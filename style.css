@@ -32,3 +32,27 @@ button {
   padding: 10px;
   cursor: pointer;
 }
+
+li {
+  margin-top: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+button {
+  background: #38bdf8;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #0ea5e9;
+}
+
+input {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}

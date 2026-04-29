@@ -1,9 +1,10 @@
 let income = 0;
 let expenses = 0;
+let expenseItems = [];
 
-// 🔹 LOAD SAVED DATA (PUT IT HERE)
 let savedIncome = localStorage.getItem("income");
 let savedExpenses = localStorage.getItem("expenses");
+let savedExpenseItems = localStorage.getItem("expenseItems");
 
 if (savedIncome !== null) {
   income = Number(savedIncome);
@@ -13,7 +14,10 @@ if (savedExpenses !== null) {
   expenses = Number(savedExpenses);
 }
 
-// 🔹 GET ELEMENTS
+if (savedExpenseItems !== null) {
+  expenseItems = JSON.parse(savedExpenseItems);
+}
+
 const incomeTotal = document.getElementById("income-total");
 const expenseTotal = document.getElementById("expense-total");
 const balance = document.getElementById("balance");
@@ -27,20 +31,50 @@ const addExpenseButton = document.getElementById("add-expense");
 
 const expenseList = document.getElementById("expense-list");
 
-// 🔹 UPDATE FUNCTION
+function saveData() {
+  localStorage.setItem("income", income);
+  localStorage.setItem("expenses", expenses);
+  localStorage.setItem("expenseItems", JSON.stringify(expenseItems));
+}
+
 function updateSummary() {
   incomeTotal.textContent = income;
   expenseTotal.textContent = expenses;
   balance.textContent = income - expenses;
 
-  // 🔹 SAVE DATA
-  localStorage.setItem("income", income);
-  localStorage.setItem("expenses", expenses);
+  saveData();
 }
 
-// 🔹 ADD INCOME
+function renderExpenses() {
+  expenseList.innerHTML = "";
+
+  expenseItems.forEach(function (item, index) {
+    const listItem = document.createElement("li");
+    listItem.textContent = item.name + " - $" + item.amount + " ";
+
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete";
+
+    deleteButton.addEventListener("click", function () {
+      expenses = expenses - item.amount;
+      expenseItems.splice(index, 1);
+
+      renderExpenses();
+      updateSummary();
+    });
+
+    listItem.appendChild(deleteButton);
+    expenseList.appendChild(listItem);
+  });
+}
+
 addIncomeButton.addEventListener("click", function () {
   const amount = Number(incomeInput.value);
+
+  if (amount <= 0) {
+    alert("Please enter a valid income amount.");
+    return;
+  }
 
   income = income + amount;
   incomeInput.value = "";
@@ -48,33 +82,28 @@ addIncomeButton.addEventListener("click", function () {
   updateSummary();
 });
 
-// 🔹 ADD EXPENSE
 addExpenseButton.addEventListener("click", function () {
   const name = expenseName.value;
   const amount = Number(expenseInput.value);
 
+  if (!name || amount <= 0) {
+    alert("Please enter an expense name and valid amount.");
+    return;
+  }
+
   expenses = expenses + amount;
 
-  const listItem = document.createElement("li");
-  listItem.textContent = name + " - $" + amount + " ";
-
-  const deleteButton = document.createElement("button");
-  deleteButton.textContent = "Delete";
-
-  deleteButton.addEventListener("click", function () {
-    expenses = expenses - amount;
-    expenseList.removeChild(listItem);
-    updateSummary();
+  expenseItems.push({
+    name: name,
+    amount: amount
   });
-
-  listItem.appendChild(deleteButton);
-  expenseList.appendChild(listItem);
 
   expenseName.value = "";
   expenseInput.value = "";
 
+  renderExpenses();
   updateSummary();
 });
 
-// 🔹 RUN ON PAGE LOAD
+renderExpenses();
 updateSummary();
